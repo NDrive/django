@@ -146,8 +146,10 @@ def translation(language):
         # translation. So we have to subvert Python's internal gettext caching.
         base_lang = lambda x: x.split('-', 1)[0]
         if base_lang(lang) in [base_lang(trans) for trans in _translations]:
-            res._info = res._info.copy()
-            res._catalog = res._catalog.copy()
+            if getattr(res, '_info', None):
+                res._info = res._info.copy()
+            if getattr(res, '_catalog', None):
+                res._catalog = res._catalog.copy()
 
         def _merge(path):
             t = _translation(path)
