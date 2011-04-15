@@ -98,6 +98,10 @@ def build_test(label):
 
     """
     parts = label.split('.')
+
+    if parts[1] == 'tests':
+        parts.pop(1)
+
     if len(parts) < 2 or len(parts) > 3:
         raise ValueError("Test label '%s' should be of the form app.TestCase or app.TestCase.test_method" % label)
 
@@ -239,6 +243,8 @@ class DjangoTestSuiteRunner(object):
     def build_suite(self, test_labels, extra_tests=None, **kwargs):
         suite = unittest.TestSuite()
 
+        import os.path
+        test_labels = tuple(l.rstrip(os.path.sep) for l in test_labels)
         if test_labels:
             for label in test_labels:
                 if '.' in label:
