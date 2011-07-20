@@ -49,7 +49,7 @@ if not logger.handlers:
 
 class AdminEmailHandler(logging.Handler):
     def __init__(self, include_html=False):
-        logging.Handler.__init__(self)        
+        logging.Handler.__init__(self)
         self.include_html = include_html
 
     """An exception log handler that e-mails log entries to site admins.
@@ -95,7 +95,15 @@ class AdminEmailHandler(logging.Handler):
             stack_trace = 'No stack trace available'
 
         message = "%s\n\n%s" % (stack_trace, request_repr)
-        reporter = ExceptionReporter(request, is_email=True, *exc_info)
-        html_message = self.include_html and reporter.get_traceback_html() or None
-        mail.mail_admins(subject, message, fail_silently=True,
-                         html_message=html_message)
+        report = lambda email=True: ExceptionReporter(request, is_email=email, *exc_info).get_traceback_html()
+        html_message = None
+        if self.include_html:
+            html_message = report(email=True)
+        mail.mail_admins(
+            subject, message,
+            fail_silently=True,
+            html_message=html_message,
+            attachments=[
+                ('error.html', report(email=False), 'text/html',)
+            ],
+        )

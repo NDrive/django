@@ -84,7 +84,7 @@ def send_mass_mail(datatuple, fail_silently=False, auth_user=None,
 
 
 def mail_admins(subject, message, fail_silently=False, connection=None,
-                html_message=None):
+                html_message=None, attachments=[]):
     """Sends a message to the admins, as defined by the ADMINS setting."""
     if not settings.ADMINS:
         return
@@ -93,11 +93,15 @@ def mail_admins(subject, message, fail_silently=False, connection=None,
                 connection=connection)
     if html_message:
         mail.attach_alternative(html_message, 'text/html')
+
+    for (attach_name, attach_data, attach_mime,) in attachments:
+        mail.attach(attach_name, attach_data, attach_mime)
+
     mail.send(fail_silently=fail_silently)
 
 
 def mail_managers(subject, message, fail_silently=False, connection=None,
-                  html_message=None):
+                  html_message=None, attachments=[]):
     """Sends a message to the managers, as defined by the MANAGERS setting."""
     if not settings.MANAGERS:
         return
@@ -106,6 +110,10 @@ def mail_managers(subject, message, fail_silently=False, connection=None,
                 connection=connection)
     if html_message:
         mail.attach_alternative(html_message, 'text/html')
+
+    for (attach_name, attach_data, attach_mime,) in attachments:
+        mail.attach(attach_name, attach_data, attach_mime)
+
     mail.send(fail_silently=fail_silently)
 
 
