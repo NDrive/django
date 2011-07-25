@@ -77,7 +77,13 @@ class AdminEmailHandler(logging.Handler):
                 (request.META.get('REMOTE_ADDR') in settings.INTERNAL_IPS and 'internal' or 'EXTERNAL'),
                 record.msg
             )
+
             request_repr = repr(request)
+
+            curl_post_args = ''
+            if request.method == 'POST':
+                curl_post_args = '-d "%s"'%request.raw_post_data
+            curl_cmd = 'curl -v %s "%s"'%(curl_post_args, request.build_absolute_uri(),)
         except:
             subject = '%s: %s' % (
                 record.levelname,
@@ -86,6 +92,7 @@ class AdminEmailHandler(logging.Handler):
 
             request = None
             request_repr = "Request repr() unavailable"
+            curl_cmd = ""
 
         if record.exc_info:
             exc_info = record.exc_info
@@ -94,7 +101,7 @@ class AdminEmailHandler(logging.Handler):
             exc_info = (None, record.msg, None)
             stack_trace = 'No stack trace available'
 
-        message = "%s\n\n%s" % (stack_trace, request_repr)
+        message = "%s\n\n%s\n\n%s" % (stack_trace, request_repr, curl_cmd)
         report = lambda email=True: ExceptionReporter(request, is_email=email, *exc_info).get_traceback_html()
         html_message = None
         if self.include_html:
