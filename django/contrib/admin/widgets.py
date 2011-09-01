@@ -181,6 +181,15 @@ class ManyToManyRawIdWidget(ForeignKeyRawIdWidget):
         return self.base_url_parameters()
 
     def label_for_value(self, value):
+        key = self.rel.get_related_field().name
+        try:
+            anchors = []
+            for obj in [self.rel.to._default_manager.using(self.db).get(**{key: v}) for v in value.split(',')]:
+                related_url = '../../../%s/%s/%s/' % (obj._meta.app_label, obj._meta.object_name.lower(), obj.pk)
+                anchors.append('<li><a href="%s">%s: <strong>%s</strong></a></li>' % (related_url, obj.pk, escape(truncate_words(obj, 14))))
+            return "<ul>%s</ul>"%("".join(anchors),)
+        except (ValueError, self.rel.to.DoesNotExist):
+            return ''
         return ''
 
     def value_from_datadict(self, data, files, name):
