@@ -155,7 +155,10 @@ class ForeignKeyRawIdWidget(forms.TextInput):
         key = self.rel.get_related_field().name
         try:
             obj = self.rel.to._default_manager.using(self.db).get(**{key: value})
-            return '&nbsp;<strong>%s</strong>' % escape(truncate_words(obj, 14))
+            related_url = '../../../%s/%s/%s/' % (obj._meta.app_label,
+                obj._meta.object_name.lower(), obj.pk)
+            return '&nbsp;<strong><a href="%s">%s</a></strong>' % (related_url,
+                escape(truncate_words(obj, 14)))
         except (ValueError, self.rel.to.DoesNotExist):
             return ''
 
