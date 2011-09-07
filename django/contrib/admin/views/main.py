@@ -213,11 +213,6 @@ class ChangeList(object):
                     value = True
                 lookup_params[key] = value
 
-            if not self.model_admin.lookup_allowed(key, value):
-                raise SuspiciousOperation(
-                    "Filtering by %s not allowed" % key
-                )
-
         # Apply lookup parameters from the query string.
         try:
             qs = qs.filter(**lookup_params)
