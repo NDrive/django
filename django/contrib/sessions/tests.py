@@ -11,6 +11,7 @@ from django.contrib.sessions.backends.cached_db import SessionStore as CacheDBSe
 from django.contrib.sessions.backends.file import SessionStore as FileSession
 from django.contrib.sessions.models import Session
 from django.contrib.sessions.middleware import SessionMiddleware
+from django.core.cache import cache
 from django.core.exceptions import ImproperlyConfigured, SuspiciousOperation
 from django.http import HttpResponse
 from django.test import TestCase, RequestFactory
@@ -297,9 +298,40 @@ class DatabaseSessionTests(SessionTestsMixin, TestCase):
         self.assertEqual(self.session['y'], 2)
 
 
+class MockDatabaseStore(DatabaseSession):
+    db_exists_called = False
+    db_exists_call_count = 0
+
+    def exists(self, session_key):
+        self.db_exists_called = True
+        self.db_exists_call_count += 1
+        return super(MockDatabaseStore, self).exists(session_key)
+class MockCacheDBSession(CacheDBSession, MockDatabaseStore):
+    pass
+
 class CacheDBSessionTests(SessionTestsMixin, TestCase):
 
-    backend = CacheDBSession
+    backend = MockCacheDBSession
+
+    def test_exists_cached(self):
+        self.session['cat'] = "dog"
+        self.session.save()
+
+        self.assertTrue(self.session.exists(self.session.session_key))
+
+        self.assertTrue(self.session.db_exists_called)
+        self.assertEqual(self.session.db_exists_call_count, 1)
+
+    def test_exists_not_cached(self):
+        self.session['cat'] = "dog"
+        self.session.save()
+
+        cache.delete(self.session.session_key)
+
+        self.assertTrue(self.session.exists(self.session.session_key))
+
+        self.assertTrue(self.session.db_exists_called)
+        self.assertEqual(self.session.db_exists_call_count, 2)
 
 # Don't need DB flushing for these tests, so can use unittest.TestCase as base class
 class FileSessionTests(SessionTestsMixin, unittest.TestCase):

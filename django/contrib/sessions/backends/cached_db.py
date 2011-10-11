@@ -20,16 +20,18 @@ class SessionStore(DBStore):
         data = cache.get(KEY_PREFIX + self.session_key, None)
         if data is None:
             data = super(SessionStore, self).load()
-            cache.set(KEY_PREFIX + self.session_key, data, 
+            cache.set(KEY_PREFIX + self.session_key, data,
                       settings.SESSION_COOKIE_AGE)
         return data
 
     def exists(self, session_key):
+        if cache.get(session_key) is not None:
+            return True
         return super(SessionStore, self).exists(session_key)
 
     def save(self, must_create=False):
         super(SessionStore, self).save(must_create)
-        cache.set(KEY_PREFIX + self.session_key, self._session, 
+        cache.set(KEY_PREFIX + self.session_key, self._session,
                   settings.SESSION_COOKIE_AGE)
 
     def delete(self, session_key=None):
