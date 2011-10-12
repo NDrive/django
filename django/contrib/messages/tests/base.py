@@ -43,6 +43,7 @@ class BaseTest(TestCase):
         'warning': constants.WARNING,
         'error': constants.ERROR,
     }
+    backend = 'django.contrib.auth.backends.ModelBackend'
 
     def setUp(self):
         self._remembered_settings = {}
@@ -61,6 +62,8 @@ class BaseTest(TestCase):
         self.old_TEMPLATE_DIRS = settings.TEMPLATE_DIRS
         settings.TEMPLATE_DIRS = ()
         self.save_warnings_state()
+        self.curr_auth = settings.AUTHENTICATION_BACKENDS
+        settings.AUTHENTICATION_BACKENDS = (self.backend,)
         warnings.filterwarnings('ignore', category=DeprecationWarning,
                                 module='django.contrib.auth.models')
 
@@ -74,6 +77,7 @@ class BaseTest(TestCase):
         settings.INSTALLED_APPS = self._installed_apps
         settings.MESSAGE_STORAGE = self._message_storage
         settings.TEMPLATE_DIRS = self.old_TEMPLATE_DIRS
+        settings.AUTHENTICATION_BACKENDS = self.curr_auth
         self.restore_warnings_state()
 
     def restore_setting(self, setting):

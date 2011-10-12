@@ -1,3 +1,15 @@
+from django.conf import settings
+from django.test import TestCase
+class BaseTestCase(TestCase):
+    backend = 'django.contrib.auth.backends.ModelBackend'
+    def setUp(self):
+        self.curr_auth = settings.AUTHENTICATION_BACKENDS
+        settings.AUTHENTICATION_BACKENDS = (self.backend,)
+
+    def tearDown(self):
+        settings.AUTHENTICATION_BACKENDS = self.curr_auth
+
+
 from django.contrib.auth.tests.auth_backends import (BackendTest,
     RowlevelBackendTest, AnonymousUserBackendTest, NoAnonymousUserBackendTest,
     NoBackendsTest, InActiveUserBackendTest, NoInActiveUserBackendTest)

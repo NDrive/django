@@ -7,10 +7,11 @@ from django.contrib.auth import SESSION_KEY, REDIRECT_FIELD_NAME
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.sites.models import Site, RequestSite
 from django.contrib.auth.models import User
-from django.test import TestCase
 from django.core import mail
 from django.core.urlresolvers import reverse
 from django.http import QueryDict
+
+from django.contrib.auth.tests import BaseTestCase as TestCase
 
 class AuthViewsTestCase(TestCase):
     """
@@ -20,6 +21,7 @@ class AuthViewsTestCase(TestCase):
     urls = 'django.contrib.auth.tests.urls'
 
     def setUp(self):
+        super(AuthViewsTestCase,self).setUp()
         self.old_LANGUAGES = settings.LANGUAGES
         self.old_LANGUAGE_CODE = settings.LANGUAGE_CODE
         settings.LANGUAGES = (('en', 'English'),)
@@ -30,6 +32,7 @@ class AuthViewsTestCase(TestCase):
         )
 
     def tearDown(self):
+        super(AuthViewsTestCase,self).tearDown()
         settings.LANGUAGES = self.old_LANGUAGES
         settings.LANGUAGE_CODE = self.old_LANGUAGE_CODE
         settings.TEMPLATE_DIRS = self.old_TEMPLATE_DIRS

@@ -1,6 +1,6 @@
-from django.test import TestCase
 from django.contrib.auth import signals
 
+from django.contrib.auth.tests import BaseTestCase as TestCase
 
 class SignalTestCase(TestCase):
     urls = 'django.contrib.auth.tests.urls'
@@ -14,6 +14,7 @@ class SignalTestCase(TestCase):
 
     def setUp(self):
         """Set up the listeners and reset the logged in/logged out counters"""
+        super(SignalTestCase, self).setUp()
         self.logged_in = []
         self.logged_out = []
         signals.user_logged_in.connect(self.listener_login)
@@ -21,6 +22,7 @@ class SignalTestCase(TestCase):
 
     def tearDown(self):
         """Disconnect the listeners"""
+        super(SignalTestCase, self).tearDown()
         signals.user_logged_in.disconnect(self.listener_login)
         signals.user_logged_out.disconnect(self.listener_logout)
 

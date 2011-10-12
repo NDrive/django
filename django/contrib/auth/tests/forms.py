@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm,  PasswordChangeForm, SetPasswordForm, UserChangeForm, PasswordResetForm
-from django.test import TestCase
 
+from django.contrib.auth.tests import BaseTestCase as TestCase
 
 class UserCreationFormTest(TestCase):
 
