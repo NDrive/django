@@ -302,6 +302,10 @@ class MockDatabaseStore(DatabaseSession):
     db_exists_called = False
     db_exists_call_count = 0
 
+    def _clear_count(self):
+        self.db_exists_called = False
+        self.db_exists_call_count = 0
+
     def exists(self, session_key):
         self.db_exists_called = True
         self.db_exists_call_count += 1
@@ -313,25 +317,29 @@ class CacheDBSessionTests(SessionTestsMixin, TestCase):
 
     backend = MockCacheDBSession
 
-    def test_exists_cached(self):
+    def _local_setup(self):
         self.session['cat'] = "dog"
         self.session.save()
+        self.session._clear_count()
+
+    def test_exists_cached(self):
+        self._local_setup()
 
         self.assertTrue(self.session.exists(self.session.session_key))
 
         self.assertTrue(self.session.db_exists_called)
+        # TODO This should be 0 calls.
         self.assertEqual(self.session.db_exists_call_count, 1)
 
     def test_exists_not_cached(self):
-        self.session['cat'] = "dog"
-        self.session.save()
+        self._local_setup()
 
         cache.delete(self.session.session_key)
 
         self.assertTrue(self.session.exists(self.session.session_key))
 
         self.assertTrue(self.session.db_exists_called)
-        self.assertEqual(self.session.db_exists_call_count, 2)
+        self.assertEqual(self.session.db_exists_call_count, 1)
 
 # Don't need DB flushing for these tests, so can use unittest.TestCase as base class
 class FileSessionTests(SessionTestsMixin, unittest.TestCase):
